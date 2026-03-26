@@ -80,6 +80,11 @@ variable "cron_concurrency_policy" {
   description = "CronJob concurrencyPolicy (Allow | Forbid | Replace)."
   type        = string
   default     = "Forbid"
+
+  validation {
+    condition     = contains(["Allow", "Forbid", "Replace"], var.cron_concurrency_policy)
+    error_message = "cron_concurrency_policy must be one of: Allow, Forbid, or Replace."
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -118,6 +123,7 @@ variable "env_vars" {
   description = "Plain-text environment variables."
   type        = map(string)
   default     = {}
+  sensitive   = true
 }
 
 
@@ -216,6 +222,13 @@ variable "volumes" {
     read_only  = optional(bool, false)
   }))
   default = []
+
+  validation {
+    condition = alltrue([
+      for v in var.volumes : contains(["emptyDir", "configMap", "pvc"], v.type)
+    ])
+    error_message = "volumes[*].type must be one of \"emptyDir\", \"configMap\", or \"pvc\"."
+  }
 }
 
 

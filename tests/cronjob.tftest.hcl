@@ -71,7 +71,7 @@ run "cronjob_full" {
   }
 
   assert {
-    condition     = kubernetes_secret_v1.env[0].metadata[0].name == "etl-job-env"
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "etl-job-env"
     error_message = "secret should be created for env vars"
   }
 
