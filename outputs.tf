@@ -12,6 +12,6 @@ output "humanitec_metadata" {
 }
 
 output "endpoint" {
-  description = "An optional endpoint uri that the workload's service ports will be exposed on if any are defined"
+  description = "An optional Kubernetes service DNS hostname that the workload's service ports will be exposed on if any are defined"
   value       = local.has_service ? "${var.name}.${var.namespace}.svc.cluster.local" : null
 }
