@@ -4,11 +4,11 @@
 
 locals {
   common_labels = merge(
+    var.labels,
     {
       "app.kubernetes.io/name"       = var.name
       "app.kubernetes.io/managed-by" = "humanitec"
     },
-    var.labels,
   )
 
   # Pod template — shared between Deployment, StatefulSet & CronJob
@@ -26,9 +26,10 @@ locals {
 
 resource "kubernetes_secret_v1" "env" {
   metadata {
-    name      = "${var.name}-env"
-    namespace = var.namespace
-    labels    = local.common_labels
+    name        = "${var.name}-env"
+    namespace   = var.namespace
+    labels      = local.common_labels
+    annotations = var.annotations
   }
 
   data = var.env_vars
@@ -495,13 +496,15 @@ resource "kubernetes_cron_job_v1" "this" {
 
     job_template {
       metadata {
-        labels = local.pod_labels
+        labels      = local.pod_labels
+        annotations = var.annotations
       }
 
       spec {
         template {
           metadata {
-            labels = local.pod_labels
+            labels      = local.pod_labels
+            annotations = var.annotations
           }
 
           spec {
