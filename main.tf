@@ -25,8 +25,6 @@ locals {
 # ---------------------------------------------------------------------------
 
 resource "kubernetes_secret_v1" "env" {
-  count = length(var.env_vars) > 0 ? 1 : 0
-
   metadata {
     name      = "${var.name}-env"
     namespace = var.namespace
@@ -100,12 +98,9 @@ resource "kubernetes_deployment_v1" "this" {
           }
 
           # --- Env vars from Secret ---
-          dynamic "env_from" {
-            for_each = length(var.env_vars) > 0 ? [1] : []
-            content {
-              secret_ref {
-                name = kubernetes_secret_v1.env[0].metadata[0].name
-              }
+          env_from {
+            secret_ref {
+              name = kubernetes_secret_v1.env.metadata[0].name
             }
           }
 
@@ -323,12 +318,9 @@ resource "kubernetes_stateful_set_v1" "this" {
           }
 
           # --- Env vars from Secret ---
-          dynamic "env_from" {
-            for_each = length(var.env_vars) > 0 ? [1] : []
-            content {
-              secret_ref {
-                name = kubernetes_secret_v1.env[0].metadata[0].name
-              }
+          env_from {
+            secret_ref {
+              name = kubernetes_secret_v1.env.metadata[0].name
             }
           }
 
@@ -481,6 +473,13 @@ resource "kubernetes_stateful_set_v1" "this" {
 resource "kubernetes_cron_job_v1" "this" {
   count = local.is_cronjob ? 1 : 0
 
+  lifecycle {
+    precondition {
+      condition     = var.cron_schedule != ""
+      error_message = "cron_schedule must be set when workload_type is 'CronJob'."
+    }
+  }
+
   metadata {
     name        = var.name
     namespace   = var.namespace
@@ -508,18 +507,34 @@ resource "kubernetes_cron_job_v1" "this" {
           spec {
             restart_policy       = "OnFailure"
             service_account_name = var.service_account_name != "" ? var.service_account_name : null
+            node_selector        = length(var.node_selector) > 0 ? var.node_selector : null
+
+            dynamic "image_pull_secrets" {
+              for_each = var.image_pull_secrets
+              content {
+                name = image_pull_secrets.value
+              }
+            }
+
+            dynamic "toleration" {
+              for_each = var.tolerations
+              content {
+                key      = toleration.value.key
+                operator = toleration.value.operator
+                value    = toleration.value.value
+                effect   = toleration.value.effect
+              }
+            }
 
             container {
-              name  = var.name
-              image = var.image
-              args  = length(var.args) > 0 ? var.args : null
+              name    = var.name
+              image   = var.image
+              command = length(var.command) > 0 ? var.command : null
+              args    = length(var.args) > 0 ? var.args : null
 
-              dynamic "env_from" {
-                for_each = length(var.env_vars) > 0 ? [1] : []
-                content {
-                  secret_ref {
-                    name = kubernetes_secret_v1.env[0].metadata[0].name
-                  }
+              env_from {
+                secret_ref {
+                  name = kubernetes_secret_v1.env.metadata[0].name
                 }
               }
 
@@ -531,6 +546,16 @@ resource "kubernetes_cron_job_v1" "this" {
                 limits = {
                   cpu    = var.resources.limits.cpu
                   memory = var.resources.limits.memory
+                }
+              }
+
+              # --- Volume mounts ---
+              dynamic "volume_mount" {
+                for_each = var.volumes
+                content {
+                  name       = volume_mount.value.name
+                  mount_path = volume_mount.value.mount_path
+                  read_only  = volume_mount.value.read_only
                 }
               }
             }
@@ -582,6 +607,35 @@ resource "kubernetes_cron_job_v1" "this" {
                     privileged                 = security_context.value.privileged
                     allow_privilege_escalation = security_context.value.allow_privilege_escalation
                   }
+                }
+              }
+            }
+
+            # --- Volumes ---
+            dynamic "volume" {
+              for_each = [for v in var.volumes : v if v.type == "emptyDir"]
+              content {
+                name = volume.value.name
+                empty_dir {}
+              }
+            }
+
+            dynamic "volume" {
+              for_each = [for v in var.volumes : v if v.type == "configMap"]
+              content {
+                name = volume.value.name
+                config_map {
+                  name = volume.value.source
+                }
+              }
+            }
+
+            dynamic "volume" {
+              for_each = [for v in var.volumes : v if v.type == "pvc"]
+              content {
+                name = volume.value.name
+                persistent_volume_claim {
+                  claim_name = volume.value.source
                 }
               }
             }

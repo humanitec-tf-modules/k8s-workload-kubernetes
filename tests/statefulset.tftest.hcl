@@ -46,8 +46,8 @@ run "statefulset_sparse" {
   }
 
   assert {
-    condition     = length(kubernetes_secret_v1.env) == 0
-    error_message = "no secret should be created when env_vars is empty"
+    condition     = length(kubernetes_secret_v1.env.data) == 0
+    error_message = "secret should have no data when env_vars is empty"
   }
 }
 
@@ -123,12 +123,12 @@ run "statefulset_full" {
   }
 
   assert {
-    condition     = kubernetes_secret_v1.env[0].metadata[0].name == "statefulset-full-env"
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "statefulset-full-env"
     error_message = "secret should be created for env vars"
   }
 
   assert {
-    condition     = kubernetes_secret_v1.env[0].data["PGDATA"] == "/var/lib/postgresql/data"
+    condition     = kubernetes_secret_v1.env.data["PGDATA"] == "/var/lib/postgresql/data"
     error_message = "secret should contain PGDATA"
   }
 
