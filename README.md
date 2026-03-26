@@ -34,6 +34,8 @@ It supports three workload types: `Deployment`, `StatefulSet`, and `CronJob`. Th
     hctl create resource-type k8s-workload --set=description='Kubernetes Workload' --set=output_schema='{"type":"object","properties":{"endpoint":{"type":"string"}}}'
     ```
 
+3. There must be a resource type and module for a Kubernetes namespace to deploy the workload into. The example code below uses the resource type `k8s-namespace` to request a dependent resource of that type. A sample implementation is available in the [k8s-namespace-kubernetes](https://github.com/humanitec-tf-modules/k8s-namespace-kubernetes) module.
+
 ## Installation
 
 Install this with the `hctl` CLI, you should replace the `CHANGEME` in the module source with the latest release tag, replace the `CHANGEME` in the provider mapping with your real provider type and alias for Kubernetes.
@@ -76,13 +78,13 @@ resource "platform-orchestrator_module" "k8s_workload" {
 For CLI use:
 
 ```shell
-hctl create module \
+hctl create module k8s-workload \
     --set=resource_type=k8s-workload \
     --set=module_source=git::https://github.com/humanitec-tf-modules/k8s-workload-kubernetes?ref=CHANGEME \
     --set=provider_mapping='{"kubernetes": "CHANGEME"}' \
     --set=dependencies='{"ns":{"type":"k8s-namespace","id":"env-namespace"}}' \
     --set=module_inputs='{"namespace": "${resources.ns.outputs.name}"}' \
-    --set=module_params='{"image":{"type":"string"},"name":{"type":"string"},"env_vars":{"type":"map(string)","is_optional":true}}'
+    --set=module_params='{"image":{"type":"string"},"name":{"type":"string"},"env_vars":{"type":"map","is_optional":true}}'
 ```
 
 The `namespace`, `name`, and `image` are required inputs. You can set them as module inputs (e.g. from resource graph dependencies) or pass them as module parameters at deployment time, as shown in the example above.

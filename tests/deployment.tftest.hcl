@@ -20,7 +20,7 @@ run "deployment_sparse" {
   }
 
   assert {
-    condition     = length(kubernetes_secret_v1.env.data) == 0
+    condition     = length(nonsensitive(kubernetes_secret_v1.env.data)) == 0
     error_message = "secret should have no data when env_vars is empty"
   }
 
@@ -103,7 +103,7 @@ run "deployment_full" {
   }
 
   assert {
-    condition     = kubernetes_secret_v1.env.data["MY_ENV_VAR"] == "my-value"
+    condition     = nonsensitive(kubernetes_secret_v1.env.data["MY_ENV_VAR"]) == "my-value"
     error_message = "secret should contain MY_ENV_VAR"
   }
 
