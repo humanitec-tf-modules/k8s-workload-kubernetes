@@ -9,6 +9,27 @@ It supports three workload types: `Deployment`, `StatefulSet`, and `CronJob`. Th
 1. There must be a module provider setup for `kubernetes` (`hashicorp/kubernetes`).
 2. There must be a resource type setup for `k8s-workload`, for example:
 
+    For Terraform/OpenTofu use:
+
+    ```hcl
+    resource "platform-orchestrator_resource_type" "k8s_workload" {
+    id                      = "k8s-workload"
+    description             = "Kubernetes Workload"
+    is_developer_accessible = true
+    output_schema = jsonencode({
+        type = "object"
+        properties = {
+        endpoint = {
+            description = "An optional endpoint hostname that the service ports of the workload will be exposed on if any are defined"
+            type        = "string"
+        }
+        }
+    })
+    }
+    ```
+
+    For CLI use:
+
     ```shell
     hctl create resource-type k8s-workload --set=description='Kubernetes Workload' --set=output_schema='{"type":"object","properties":{"endpoint":{"type":"string"}}}'
     ```
@@ -16,6 +37,43 @@ It supports three workload types: `Deployment`, `StatefulSet`, and `CronJob`. Th
 ## Installation
 
 Install this with the `hctl` CLI, you should replace the `CHANGEME` in the module source with the latest release tag, replace the `CHANGEME` in the provider mapping with your real provider type and alias for Kubernetes.
+
+For Terraform/OpenTofu use:
+
+```hcl
+resource "platform-orchestrator_module" "k8s_workload" {
+  id            = "k8s-workload"
+  description   = "Kubernetes workload"
+  resource_type = platform-orchestrator_resource_type.k8s_workload.id
+  module_source = "git::https://github.com/humanitec-tf-modules/k8s-workload-kubernetes?ref=CHANGEME"
+  provider_mapping = {
+    kubernetes = "CHANGEME"
+  }
+  module_params = {
+    image = {
+      type = "string"
+    }
+    name = {
+      type = "string"
+    }
+    env_vars = {
+      type        = "map(string)"
+      is_optional = true
+    }
+  }
+  module_inputs = jsonencode({
+    namespace = "$${resources.ns.outputs.name}"
+  })
+  dependencies = {
+    ns = {
+      type = "k8s-namespace"
+      id   = "env-namespace"
+    }
+  }
+}
+```
+
+For CLI use:
 
 ```shell
 hctl create module \
