@@ -150,6 +150,6 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | An optional endpoint uri that the workload's service ports will be exposed on if any are defined |
+| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | An optional Kubernetes service DNS hostname that the workload's service ports will be exposed on if any are defined |
 | <a name="output_humanitec_metadata"></a> [humanitec\_metadata](#output\_humanitec\_metadata) | Metadata for Humanitec. |
 <!-- END_TF_DOCS -->
