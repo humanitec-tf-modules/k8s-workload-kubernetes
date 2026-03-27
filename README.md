@@ -40,6 +40,8 @@ It supports three workload types: `Deployment`, `StatefulSet`, and `CronJob`. Th
 
 Install this with the `hctl` CLI, you should replace the `CHANGEME` in the module source with the latest release tag, replace the `CHANGEME` in the provider mapping with your real provider type and alias for Kubernetes.
 
+An example module is shown below. You may choose to expose any of the [inputs](#inputs) as `module_params` or pre-populate them via `module_inputs`. For example, to always set the workload type to `StatefulSet`, set the `workload_type` to `"StatefulSet"` in `module_inputs`.
+
 For Terraform/OpenTofu use:
 
 ```hcl
