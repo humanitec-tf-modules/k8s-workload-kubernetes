@@ -154,4 +154,5 @@ No modules.
 |------|-------------|
 | <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | An optional Kubernetes service DNS hostname that the workload's service ports will be exposed on if any are defined |
 | <a name="output_humanitec_metadata"></a> [humanitec\_metadata](#output\_humanitec\_metadata) | Metadata for Humanitec. |
+| <a name="output_service_name"></a> [service\_name](#output\_service\_name) | Kubernetes service name |
 <!-- END_TF_DOCS -->
