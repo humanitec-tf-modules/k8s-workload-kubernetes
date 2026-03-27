@@ -57,7 +57,7 @@ resource "platform-orchestrator_module" "k8s_workload" {
       type = "string"
     }
     env_vars = {
-      type        = "map(string)"
+      type        = "map"
       is_optional = true
     }
   }
