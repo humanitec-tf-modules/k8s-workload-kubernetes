@@ -13,18 +13,18 @@ It supports three workload types: `Deployment`, `StatefulSet`, and `CronJob`. Th
 
     ```hcl
     resource "platform-orchestrator_resource_type" "k8s_workload" {
-    id                      = "k8s-workload"
-    description             = "Kubernetes Workload"
-    is_developer_accessible = true
-    output_schema = jsonencode({
+      id                      = "k8s-workload"
+      description             = "Kubernetes Workload"
+      is_developer_accessible = true
+      output_schema = jsonencode({
         type = "object"
         properties = {
-        endpoint = {
+          endpoint = {
             description = "An optional endpoint hostname that the service ports of the workload will be exposed on if any are defined"
             type        = "string"
+          }
         }
-        }
-    })
+      })
     }
     ```
 
