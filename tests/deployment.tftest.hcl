@@ -25,6 +25,11 @@ run "deployment_sparse" {
   }
 
   assert {
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "deployment-sparse-env-44136fa3"
+    error_message = "secret name should include content hash suffix"
+  }
+
+  assert {
     condition     = length(kubernetes_cron_job_v1.this) == 0
     error_message = "cronjob should not be created for Deployment type"
   }
@@ -98,18 +103,18 @@ run "deployment_full" {
   }
 
   assert {
-    condition     = kubernetes_secret_v1.env.metadata[0].name == "deployment-full-env"
-    error_message = "secret should be created for env vars"
-  }
-
-  assert {
     condition     = nonsensitive(kubernetes_secret_v1.env.data["MY_ENV_VAR"]) == "my-value"
     error_message = "secret should contain MY_ENV_VAR"
   }
 
   assert {
-    condition     = kubernetes_deployment_v1.this[0].spec[0].template[0].spec[0].container[0].env_from[0].secret_ref[0].name == "deployment-full-env"
-    error_message = "primary container should reference the env secret"
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "deployment-full-env-f1a72fee"
+    error_message = "secret name should include content hash suffix"
+  }
+
+  assert {
+    condition     = kubernetes_deployment_v1.this[0].spec[0].template[0].spec[0].container[0].env_from[0].secret_ref[0].name == kubernetes_secret_v1.env.metadata[0].name
+    error_message = "deployment should reference env secret"
   }
 
   assert {
