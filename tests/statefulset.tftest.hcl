@@ -49,6 +49,11 @@ run "statefulset_sparse" {
     condition     = length(nonsensitive(kubernetes_secret_v1.env.data)) == 0
     error_message = "secret should have no data when env_vars is empty"
   }
+
+  assert {
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "statefulset-sparse-env-44136fa3"
+    error_message = "secret name should include content hash suffix"
+  }
 }
 
 run "statefulset_full" {
@@ -123,18 +128,18 @@ run "statefulset_full" {
   }
 
   assert {
-    condition     = kubernetes_secret_v1.env.metadata[0].name == "statefulset-full-env"
-    error_message = "secret should be created for env vars"
-  }
-
-  assert {
     condition     = nonsensitive(kubernetes_secret_v1.env.data["PGDATA"]) == "/var/lib/postgresql/data"
     error_message = "secret should contain PGDATA"
   }
 
   assert {
-    condition     = kubernetes_stateful_set_v1.this[0].spec[0].template[0].spec[0].container[0].env_from[0].secret_ref[0].name == "statefulset-full-env"
-    error_message = "primary container should reference the env secret"
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "statefulset-full-env-04abaf17"
+    error_message = "secret name should include content hash suffix"
+  }
+
+  assert {
+    condition     = kubernetes_stateful_set_v1.this[0].spec[0].template[0].spec[0].container[0].env_from[0].secret_ref[0].name == kubernetes_secret_v1.env.metadata[0].name
+    error_message = "statefulset should reference env secret"
   }
 
   assert {

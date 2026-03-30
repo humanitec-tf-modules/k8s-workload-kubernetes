@@ -19,15 +19,8 @@ locals {
   is_cronjob     = var.workload_type == "CronJob"
   has_service    = local.is_deployment || local.is_statefulset
 
-  # Checksum of env vars — forces pod restart when the secret content changes
-  env_checksum = sha256(jsonencode(var.env_vars))
-
-  pod_annotations = merge(
-    var.annotations,
-    {
-      "checksum/env" = local.env_checksum
-    },
-  )
+  # Deterministic suffix derived from env var contents. Changes when values change, giving the secret a new name and forcing a pod rollout.
+  secret_name_suffix = substr(sha256(jsonencode(var.env_vars)), 0, 8)
 }
 
 # ---------------------------------------------------------------------------
@@ -36,7 +29,7 @@ locals {
 
 resource "kubernetes_secret_v1" "env" {
   metadata {
-    name        = "${var.name}-env"
+    name        = "${var.name}-env-${local.secret_name_suffix}"
     namespace   = var.namespace
     labels      = local.common_labels
     annotations = var.annotations
@@ -73,7 +66,7 @@ resource "kubernetes_deployment_v1" "this" {
     template {
       metadata {
         labels      = local.pod_labels
-        annotations = local.pod_annotations
+        annotations = var.annotations
       }
 
       spec {
@@ -293,7 +286,7 @@ resource "kubernetes_stateful_set_v1" "this" {
     template {
       metadata {
         labels      = local.pod_labels
-        annotations = local.pod_annotations
+        annotations = var.annotations
       }
 
       spec {
@@ -514,7 +507,7 @@ resource "kubernetes_cron_job_v1" "this" {
         template {
           metadata {
             labels      = local.pod_labels
-            annotations = local.pod_annotations
+            annotations = var.annotations
           }
 
           spec {

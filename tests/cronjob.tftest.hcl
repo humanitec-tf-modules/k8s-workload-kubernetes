@@ -30,6 +30,11 @@ run "cronjob_sparse" {
     condition     = length(kubernetes_service_v1.this) == 0
     error_message = "service should not be created for CronJob type"
   }
+
+  assert {
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "cleanup-job-env-44136fa3"
+    error_message = "secret name should include content hash suffix"
+  }
 }
 
 run "cronjob_full" {
@@ -71,8 +76,13 @@ run "cronjob_full" {
   }
 
   assert {
-    condition     = kubernetes_secret_v1.env.metadata[0].name == "etl-job-env"
-    error_message = "secret should be created for env vars"
+    condition     = kubernetes_secret_v1.env.metadata[0].name == "etl-job-env-bb14c6be"
+    error_message = "secret name should include content hash suffix"
+  }
+
+  assert {
+    condition     = kubernetes_cron_job_v1.this[0].spec[0].job_template[0].spec[0].template[0].spec[0].container[0].env_from[0].secret_ref[0].name == kubernetes_secret_v1.env.metadata[0].name
+    error_message = "cronjob should reference env secret"
   }
 
   assert {

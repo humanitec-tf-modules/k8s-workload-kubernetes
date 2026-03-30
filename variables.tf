@@ -321,3 +321,4 @@ variable "wait_for_rollout" {
   description = "Whether to wait for the workload to be rolled out."
   default     = true
 }
+
