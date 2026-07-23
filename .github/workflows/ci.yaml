@@ -7,7 +7,7 @@ on:
 
 jobs:
   ci:
-    uses: humanitec-tf-modules/reusable-workflows/.github/workflows/ci.yaml@main
+    uses: stellwerk-tf-modules/reusable-workflows/.github/workflows/ci.yaml@main
     secrets: inherit
     with:
       disable-tf-format: false

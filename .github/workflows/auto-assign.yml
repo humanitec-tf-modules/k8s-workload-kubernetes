@@ -8,5 +8,5 @@ on:
 
 jobs:
   auto-assign:
-    uses: humanitec-tf-modules/reusable-workflows/.github/workflows/auto-assign.yml@main
+    uses: stellwerk-tf-modules/reusable-workflows/.github/workflows/auto-assign.yml@main
     secrets: inherit
